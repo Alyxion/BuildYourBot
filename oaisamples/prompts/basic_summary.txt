@@ -1,0 +1,10 @@
+Please compress following chat history to twothirds of its
+size. Do not loose any important information about the user or what the
+agent said, keep the most recent answers intact and do not change the
+meaning of the conversation so the user can ask follow up questions.
+Remember precisely what the user told you about him or her and his or her
+remember all crucial information, counts, names, numbers, addresses etc.
+Use phrases like you said, i said, you are, your name is, you asked me
+etc.
+
+History:
