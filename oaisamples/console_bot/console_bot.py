@@ -1,11 +1,8 @@
 import os
-from typing import Literal
-
-from pydantic import BaseModel
-
 from oaisamples.easy_bot.easy_bot import gpt_model, EasyChatbot
 
 PROMPT_DIR = os.path.dirname(__file__) + "/../prompts"
+PROMPT_SOURCES = ["teacher_walter.txt", "teacher_walter_ascii.txt"]
 costs_per_1k_in = float(os.getenv("OPENAI_COSTS_PER_1K_IN", "0.001"))
 costs_per_1k_out = float(os.getenv("OPENAI_COSTS_PER_1K_OUT", "0.002"))
 
@@ -14,7 +11,7 @@ if __name__ == "__main__":
     os.makedirs(rel_path, exist_ok=True)
     HISTORY_FILENAME = f"{rel_path}/chat_history.txt"
 
-    prompt = open(PROMPT_DIR + "/teacher_walter.txt", "r").read()
+    prompt = "\n".join([open(f"{PROMPT_DIR}/{cur_prompt}", "r").read() for cur_prompt in PROMPT_SOURCES])
 
     ascii_colors_supported = False
     # check if the terminal supports colors
@@ -22,7 +19,7 @@ if __name__ == "__main__":
     escape_code_bot = "\033[32m"
     escape_code_default = "\033[39m"
 
-    chat_bot = EasyChatbot(prompt=prompt)
+    chat_bot = EasyChatbot(system_prompt=prompt)
 
     print(f"Chat conversation using {gpt_model}")
     print(f"Token limit: {chat_bot.max_tokens}")

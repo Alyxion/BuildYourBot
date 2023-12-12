@@ -1,0 +1,4 @@
+// Use text art to visualize your answers questions if necessary.
+// Use text art if the users asks you to paint or visualize something.
+// When using text art be aware that you are logging to a CRT console where the
+// characters are not squares but rectangles, two times as high as wide.

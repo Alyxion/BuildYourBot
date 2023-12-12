@@ -25,10 +25,10 @@ class EasyChatbot:
     """A very simple chatbot that uses OpenAI's API to generate responses,
     keeps track of the history and summarizes it if necessary"""
 
-    def __init__(self, prompt):
+    def __init__(self, system_prompt: str):
         """Initialize the chatbot
 
-        :param prompt: The system prompt to use"""
+        :param system_prompt: The system prompt to use"""
         self.client = None
         if azure_endpoint is not None:
             self.client = AzureOpenAI(
@@ -38,6 +38,8 @@ class EasyChatbot:
             openai.api_version = api_version
             self.client = OpenAI(api_key=api_key)
         self.message_history: list[HistoryEntry] = []
+        """The full message history of the chatbot"""
+        self.recent_message_history: list[HistoryEntry] = []
         """The history of the chatbot"""
         self.max_response_tokens = 400
         """Maximum number of tokens the chatbot can generate"""
@@ -58,7 +60,7 @@ class EasyChatbot:
         self.output_token_usage = 0
         """The number of tokens the chatbot generated"""
         self.system_prompt = (
-            f"{prompt}\nBelow you can find the history of our previous"
+            f"{system_prompt}\nBelow you can find the history of our previous"
             "conversation:\n"
             ""
         )
@@ -81,7 +83,7 @@ class EasyChatbot:
         :return: The chat history as a string
         """
         history = "\n".join(
-            [f"{entry.user_type}: {entry.message}" for entry in self.message_history]
+            [f"{entry.user_type}: {entry.message}" for entry in self.recent_message_history]
         )
         if include_old_history:
             history = f"{self.old_history}\n{history}"
@@ -104,7 +106,7 @@ class EasyChatbot:
         # check if an error occurred
         if completion.choices[0].finish_reason != "stop":
             raise Exception(completion.choices[0].error)
-        self.message_history = []
+        self.recent_message_history = []
         self.old_history = completion.choices[0].message.content
 
     def cleanup_history(self):
@@ -126,7 +128,7 @@ class EasyChatbot:
         :param message: The message to send
         :return: The response of the chatbot"""
         history: list[dict] = []
-        for element in self.message_history:
+        for element in self.recent_message_history:
             history.append({"role": element.user_type, "content": element.message})
         conv_history = (  # construct the conversation history
                 [
@@ -155,9 +157,13 @@ class EasyChatbot:
         # count costs
         self.input_tokens_usage += completion.usage.prompt_tokens
         self.output_token_usage += completion.usage.completion_tokens
-        self.message_history.append(HistoryEntry(user_type="user", message=message))
+        new_user_entry = HistoryEntry(user_type="user", message=message)
+        self.recent_message_history.append(new_user_entry)
+        self.message_history.append(new_user_entry)
         answer = completion.choices[0].message.content
-        self.message_history.append(HistoryEntry(user_type="assistant", message=answer))
+        new_bot_entry = HistoryEntry(user_type="assistant", message=answer)
+        self.recent_message_history.append(new_bot_entry)
+        self.message_history.append(new_bot_entry)
         self.cleanup_history()
         return answer
 
