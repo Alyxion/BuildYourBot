@@ -14,7 +14,7 @@ load_dotenv(os.path.dirname(__file__) + "/../../.env")
 
 api_key = os.getenv("OPENAI_KEY")
 azure_endpoint = os.getenv("OPENAI_AZURE_ENDPOINT", None)
-api_version = os.getenv("OPENAI_API_VERSION")
+api_version = os.getenv("OPENAI_API_VERSION", "2023-05-15")
 gpt_model = os.getenv("OPENAI_BASE_MODEL")
 
 # define directories

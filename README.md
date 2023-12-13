@@ -1,22 +1,53 @@
 # 🤖 BuildYourBot 🤖
 
-This repository contains several very basic examples about how to build a basic chatbot 
-using the OpenAI API which tracks your chat history, summarizes it if needed, restores 
-the history, and then continues the conversation, tracks the costs and token usage etc.
+This repository contains several very basic examples about how to build a simple chatbot
+using the OpenAI API.
 
-In addition it provides a very basic console app which can be used to test the API and
+The sample code tracks your chat history, summarizes it if needed
+(as well using the OpenAI chat API) restores the history from previous sessions, and then
+continues the conversation, tracks the costs and token usage etc.
+
+In addition it provides two sample applications which can be used to test the API and
 behaves like a math teacher. Feel free to write your own prompts and experiment with
 it.
 
+## Streamlit Chatbot Demo
+
+![img.png](assets/streamlit_demo.png)
+
+To run the streamlit demo (after you followed the setup instructions below):
+```bash
+poetry run streamlit run oaisamples/streamlit_sample/app.py --server.headless true --runner.magicEnabled false
+```
+
+Afterwards click the local network link to open your browser.
+
+## Console Chatbot Demo
+
 ![img.png](assets/console_screenshot.png)
+
+To run the console demo (after you followed the setup instructions below):
+```bash
+poetry run python oaisamples/console_bot/console_bot.py
+```
+
 
 ---
 
 ## Installation
 
 * Install Python 3.10 or above
-* Install poetry: `pip install poetry`
-* Install dependencies: `poetry install`
+* Install poetry, if you do not have it already
+
+```bash
+pip install poetry
+```
+
+* Go to this project's root directory
+* Install the dependencies defined in **pyproject.toml**:
+```bash
+poetry install
+```
 
 ---
 
@@ -26,6 +57,8 @@ it.
 * Create a `.env` file in the root of the project and add the following:
 
 ### OpenAI
+
+If you are using OpenAI you need at least to setup the OPENAI_KEY and the OPENAI_BASE_MODEL.
 
 ```
 OPENAI_KEY=YOUR_KEY_HERE
@@ -38,6 +71,8 @@ OPENAI_COSTS_PER_1K_OUT=0.002
 
 ### Azure
 
+When using Azure you need to setup the OPENAI_KEY, OPENAI_AZURE_ENDPOINT and the OPENAI_BASE_MODEL.
+
 ```
 OPENAI_KEY=YOUR_KEY_HERE
 OPENAI_AZURE_ENDPOINT=https://YOUR_ENDPOINT.openai.azure.com/
@@ -48,11 +83,7 @@ OPENAI_COSTS_PER_1K_IN=0.001
 OPENAI_COSTS_PER_1K_OUT=0.002
 ```
 
-## Demo Apps
-
-### Console
-
-* Run `poetry run python oaisamples/console_bot/console_bot.py`
+Alternatively to using an `.env` file you can also set the environment variables directly.
 
 ## License
 

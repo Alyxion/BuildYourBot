@@ -1,4 +1,5 @@
 import os
+import time
 
 import streamlit as st
 from oaisamples.easy_bot import EasyChatbot
@@ -20,6 +21,8 @@ class StreamlitChatbot:
         """The chatbot instance"""
         self.max_history = 20
         """Maximum number of recent messages to show"""
+        self.min_response_time = 1.5
+        """The minimum response time in seconds to make the bot seem more human"""
 
     @classmethod
     def create_new_instance(cls) -> EasyChatbot:
@@ -45,8 +48,14 @@ class StreamlitChatbot:
             with st.chat_message("You", avatar="user"):
                 st.markdown(text)
             with st.chat_message(BOT_NAME, avatar="assistant"):
-                with st.spinner(f"{BOT_NAME} is typing..."):
+                with st.spinner(f"{BOT_NAME} is thinking..."):
+                    start_time = time.time()
                     self.bot.add_message(text)
+                    cur_time = time.time()
+                    if cur_time - start_time < self.min_response_time:
+                        # if the answer was too fast, wait a bit, Microsoft-style
+                        time.sleep(self.min_response_time - (cur_time - start_time))
+
             st.rerun()
 
 
