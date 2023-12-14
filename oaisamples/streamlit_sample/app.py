@@ -9,6 +9,7 @@ PROMPT_SOURCES = ["teacher_walter.txt"]  # The prompts to use, will be concatena
 BOT_NAME = "Walter"  # The name of the chatbot
 
 
+
 class StreamlitChatbot:
     """A very simple chatbot that uses OpenAI's API to generate responses
     and Streamlit to render the chatbot conversation"""

@@ -6,6 +6,7 @@ import tiktoken
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.lib.azure import AzureOpenAI
+from openai.types.chat import ChatCompletion
 
 from .history_entry import HistoryEntry
 
@@ -25,11 +26,12 @@ class EasyChatbot:
     """A very simple chatbot that uses OpenAI's API to generate responses,
     keeps track of the history and summarizes it if necessary"""
 
-    def __init__(self, system_prompt: str):
+    def __init__(self, system_prompt: str, tools: list[dict] = None):
         """Initialize the chatbot
 
         :param system_prompt: The system prompt to use"""
         self.client = None
+        self.tools = tools if tools is not None else []
         if azure_endpoint is not None:
             self.client = AzureOpenAI(
                 api_key=api_key, azure_endpoint=azure_endpoint, api_version=api_version
@@ -130,6 +132,27 @@ class EasyChatbot:
         history: list[dict] = []
         for element in self.recent_message_history:
             history.append({"role": element.user_type, "content": element.message})
+        completion = self.run_completion(message=message, history=history)
+        new_user_entry = HistoryEntry(user_type="user", message=message)
+        self.recent_message_history.append(new_user_entry)
+        self.message_history.append(new_user_entry)
+        answer = completion.choices[0].message.content
+        new_bot_entry = HistoryEntry(user_type="assistant", message=answer)
+        self.recent_message_history.append(new_bot_entry)
+        self.message_history.append(new_bot_entry)
+        self.cleanup_history()
+        return answer
+
+    def run_completion(self, message: str, history: list | None = None) -> ChatCompletion:
+        """Run the OpenAI completion API and return it's response object
+
+        :param message: The message to send
+        :param history: The history to use, a list of dictionaries with the keys "role" and "content" where
+        role is either "user", "assistant" or "system" and content is the message
+        :return: The response object
+        """
+        if history is None:
+            history = []
         conv_history = (  # construct the conversation history
                 [
                     {
@@ -147,6 +170,7 @@ class EasyChatbot:
         # Call the OpenAI API interface
         completion = self.client.chat.completions.create(
             model=self.model,
+            tools=self.tools,
             messages=conv_history,
             temperature=0.5,
             max_tokens=self.max_tokens,
@@ -157,15 +181,7 @@ class EasyChatbot:
         # count costs
         self.input_tokens_usage += completion.usage.prompt_tokens
         self.output_token_usage += completion.usage.completion_tokens
-        new_user_entry = HistoryEntry(user_type="user", message=message)
-        self.recent_message_history.append(new_user_entry)
-        self.message_history.append(new_user_entry)
-        answer = completion.choices[0].message.content
-        new_bot_entry = HistoryEntry(user_type="assistant", message=answer)
-        self.recent_message_history.append(new_bot_entry)
-        self.message_history.append(new_bot_entry)
-        self.cleanup_history()
-        return answer
+        return completion
 
     def store_history(self, filename: str):
         """Store the history to a file
